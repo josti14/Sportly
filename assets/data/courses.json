@@ -11,5 +11,57 @@
     "enrolledCount": 14,
     "description": "A 4-week structured clinic focusing on spatial awareness, short passing drills, and defensive positioning.",
     "image": "assets/images/football-clinic.jpg"
+  },
+  {
+    "id": "course-02",
+    "title": "Beginner Fitness & Conditioning Bootcamp",
+    "category": "Fitness",
+    "level": "Beginner",
+    "instructor": "Coach Elena",
+    "schedule": "Mondays & Wednesdays, 17:00 - 18:00",
+    "location": "Fontys Gym Hall A",
+    "maxCapacity": 15,
+    "enrolledCount": 15,
+    "description": "An entry-level functional fitness course designed to improve cardiovascular endurance and core mobility.",
+    "image": "assets/images/fitness-bootcamp.jpg"
+  },
+  {
+    "id": "course-03",
+    "title": "3v3 Basketball Offense Clinic",
+    "category": "Basketball",
+    "level": "Intermediate",
+    "instructor": "Coach David",
+    "schedule": "Fridays, 19:00 - 21:00",
+    "location": "Indoor Court 1",
+    "maxCapacity": 12,
+    "enrolledCount": 8,
+    "description": "Master fast-break spacing, pick-and-roll execution, and perimeter shooting in half-court setups.",
+    "image": "assets/images/basketball-clinic.jpg"
+  },
+  {
+    "id": "course-04",
+    "title": "Advanced Sprint & Agility Masterclass",
+    "category": "Athletics",
+    "level": "Advanced",
+    "instructor": "Coach Sarah",
+    "schedule": "Saturdays, 10:00 - 12:00",
+    "location": "Outdoor Athletics Track",
+    "maxCapacity": 10,
+    "enrolledCount": 6,
+    "description": "High-intensity biomechanics training targeting acceleration, deceleration, and explosive change-of-direction.",
+    "image": "assets/images/agility-masterclass.jpg"
+  },
+  {
+    "id": "course-05",
+    "title": "Introduction to Swimming Technique",
+    "category": "Swimming",
+    "level": "Beginner",
+    "instructor": "Coach Luc",
+    "schedule": "Wednesdays, 08:00 - 09:30",
+    "location": "Olympic Pool Lane 3-4",
+    "maxCapacity": 8,
+    "enrolledCount": 4,
+    "description": "Focuses on breathing control, freestyle stroke efficiency, and water positioning for novice swimmers.",
+    "image": "assets/images/swimming-intro.jpg"
   }
 ]
