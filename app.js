@@ -7,7 +7,7 @@ document.addEventListener('DOMContentLoaded', () => {
   updateEnrollmentBadge();
 
   // Fetch courses from JSON file
-  fetch('assets/data/courses.json')
+fetch('assets/data/courses.json?v=2')
     .then(response => {
       if (!response.ok) {
         throw new Error('Failed to load courses.');
