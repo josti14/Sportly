@@ -2,12 +2,11 @@ document.addEventListener('DOMContentLoaded', () => {
   const courseGrid = document.getElementById('course-grid');
   const courseCountElement = document.getElementById('course-count');
 
-  // Load saved registrations from localStorage
   let savedRegistrations = JSON.parse(localStorage.getItem('my_courses')) || [];
   updateEnrollmentBadge();
 
-  // Fetch courses from JSON file
-fetch('assets/data/courses.json?v=2')
+  // Cache-busting parameter added to force fresh fetch
+  fetch('assets/data/courses.json?v=' + Date.now())
     .then(response => {
       if (!response.ok) {
         throw new Error('Failed to load courses.');
@@ -22,9 +21,8 @@ fetch('assets/data/courses.json?v=2')
       courseGrid.innerHTML = '<p>Unable to load courses at this time.</p>';
     });
 
-  // Render course cards into the grid
   function renderCourses(courses) {
-    courseGrid.innerHTML = ''; // Clear loading message
+    courseGrid.innerHTML = '';
 
     courses.forEach(course => {
       const isEnrolled = savedRegistrations.some(reg => reg.courseId === course.id);
@@ -56,7 +54,6 @@ fetch('assets/data/courses.json?v=2')
       courseGrid.appendChild(card);
     });
 
-    // Add click event listeners to registration buttons
     document.querySelectorAll('.btn-register').forEach(button => {
       button.addEventListener('click', (e) => {
         const courseId = e.target.getAttribute('data-id');
@@ -68,7 +65,6 @@ fetch('assets/data/courses.json?v=2')
     });
   }
 
-  // Handle course enrollment
   function handleRegistration(course, buttonElement) {
     course.enrolledCount++;
     
@@ -81,13 +77,11 @@ fetch('assets/data/courses.json?v=2')
     savedRegistrations.push(newRegistration);
     localStorage.setItem('my_courses', JSON.stringify(savedRegistrations));
 
-    // Update UI elements
     buttonElement.innerText = 'Enrolled ✓';
     buttonElement.disabled = true;
     updateEnrollmentBadge();
   }
 
-  // Update navbar counter
   function updateEnrollmentBadge() {
     if (courseCountElement) {
       courseCountElement.innerText = `Enrolled: ${savedRegistrations.length}`;
