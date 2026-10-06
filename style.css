@@ -3,6 +3,7 @@
   --accent-orange: #F97316;
   --bg-neutral: #F8FAFC;
   --text-dark: #0F172A;
+  --text-muted: #475569;
 }
 
 body {
@@ -21,6 +22,13 @@ body {
   align-items: center;
 }
 
+#course-count {
+  background-color: var(--accent-orange);
+  padding: 0.4rem 0.8rem;
+  border-radius: 20px;
+  font-weight: bold;
+}
+
 .container {
   padding: 2rem;
   max-width: 1200px;
@@ -29,6 +37,73 @@ body {
 
 .grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   gap: 1.5rem;
+  margin-top: 1.5rem;
+}
+
+.course-card {
+  background: white;
+  border-radius: 10px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+}
+
+.category-tag {
+  background-color: #E0E7FF;
+  color: var(--primary-blue);
+  padding: 0.2rem 0.6rem;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.level-badge {
+  background-color: #FEF3C7;
+  color: #D97706;
+  padding: 0.2rem 0.6rem;
+  border-radius: 4px;
+  font-size: 0.85rem;
+}
+
+.instructor, .schedule, .location {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  margin: 0.3rem 0;
+}
+
+.spots-info {
+  margin: 1rem 0;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.btn-register {
+  background-color: var(--accent-orange);
+  color: white;
+  border: none;
+  padding: 0.75rem;
+  border-radius: 6px;
+  font-weight: bold;
+  cursor: pointer;
+  width: 100%;
+  transition: background 0.2s ease;
+}
+
+.btn-register:hover:not(:disabled) {
+  background-color: #EA580C;
+}
+
+.btn-register:disabled {
+  background-color: #94A3B8;
+  cursor: not-allowed;
 }
