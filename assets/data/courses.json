@@ -1,0 +1,15 @@
+[
+  {
+    "id": "course-01",
+    "title": "Football Tactical Fundamentals",
+    "category": "Football",
+    "level": "Intermediate",
+    "instructor": "Coach Marcus",
+    "schedule": "Tuesdays & Thursdays, 18:00 - 19:30",
+    "location": "Fontys Sports Complex - Pitch 2",
+    "maxCapacity": 20,
+    "enrolledCount": 14,
+    "description": "A 4-week structured clinic focusing on spatial awareness, short passing drills, and defensive positioning.",
+    "image": "assets/images/football-clinic.jpg"
+  }
+]
