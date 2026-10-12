@@ -1,109 +1,378 @@
+/* Color Palette & Visual Tokens (Matching Design Spec Section 3.1) */
 :root {
   --primary-blue: #1E3A8A;
-  --accent-orange: #F97316;
+  --primary-blue-hover: #1D4ED8;
+  --secondary-orange: #F97316;
+  --secondary-orange-hover: #EA580C;
   --bg-neutral: #F8FAFC;
-  --text-dark: #0F172A;
+  --card-bg: #FFFFFF;
+  --text-charcoal: #0F172A;
   --text-muted: #475569;
+  --border-color: #E2E8F0;
+  --tag-bg: #E0E7FF;
+  --badge-yellow-bg: #FEF3C7;
+  --badge-yellow-text: #D97706;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
 
 body {
-  margin: 0;
-  font-family: 'Inter', system-ui, sans-serif;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
   background-color: var(--bg-neutral);
-  color: var(--text-dark);
+  color: var(--text-charcoal);
+  line-height: 1.5;
 }
 
+/* Header & Navbar */
 .navbar {
-  background-color: var(--primary-blue);
-  color: white;
+  background-color: var(--card-bg);
+  border-bottom: 1px solid var(--border-color);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.nav-container {
+  max-width: 1200px;
+  margin: 0 auto;
   padding: 1rem 2rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
 
-#course-count {
-  background-color: var(--accent-orange);
-  padding: 0.4rem 0.8rem;
-  border-radius: 20px;
-  font-weight: bold;
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 700;
+  font-size: 1.25rem;
+  color: var(--primary-blue);
 }
 
-.container {
-  padding: 2rem;
+.nav-links a {
+  color: var(--primary-blue);
+  text-decoration: none;
+  font-weight: 600;
+  border-bottom: 2px solid var(--primary-blue);
+  padding-bottom: 0.25rem;
+}
+
+.badge {
+  background-color: var(--secondary-orange);
+  color: white;
+  padding: 0.15rem 0.5rem;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  margin-left: 0.3rem;
+}
+
+/* Buttons */
+.btn-primary {
+  background-color: var(--secondary-orange);
+  color: white;
+  border: none;
+  padding: 0.75rem 1.25rem;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  width: 100%;
+  transition: background-color 0.2s ease;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background-color: var(--secondary-orange-hover);
+}
+
+.btn-primary:disabled {
+  background-color: #94A3B8;
+  cursor: not-allowed;
+}
+
+.btn-secondary {
+  background-color: #F1F5F9;
+  color: var(--text-charcoal);
+  border: 1px solid var(--border-color);
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btn-text {
+  background: none;
+  border: none;
+  color: var(--primary-blue);
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+/* Hero Banner */
+.hero {
+  background-color: #EFF6FF;
+  padding: 3rem 2rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.hero-content {
   max-width: 1200px;
   margin: 0 auto;
 }
 
-.grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 1.5rem;
-  margin-top: 1.5rem;
-}
-
-.course-card {
-  background: white;
-  border-radius: 10px;
-  padding: 1.5rem;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-}
-
-.card-header {
-  display: flex;
-  justify-content: space-between;
+.hero h1 {
+  font-size: 2.25rem;
+  font-weight: 700;
+  color: var(--text-charcoal);
   margin-bottom: 0.5rem;
 }
 
+.hero p {
+  color: var(--text-muted);
+  font-size: 1.1rem;
+}
+
+/* Layout Grid */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.layout-2col {
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  gap: 2rem;
+}
+
+/* Sidebar Filters */
+.sidebar-filters {
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 1.5rem;
+  height: fit-content;
+}
+
+.filter-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.filter-group {
+  margin-bottom: 1.5rem;
+}
+
+.filter-group h4 {
+  font-size: 0.95rem;
+  margin-bottom: 0.75rem;
+  color: var(--text-charcoal);
+}
+
+.filter-group label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+/* Catalog Grid */
+.catalog-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 1.5rem;
+}
+
+.results-count {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+}
+
+.course-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.5rem;
+}
+
+/* Course Card UI */
+.course-card {
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.course-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+.card-img {
+  width: 100%;
+  height: 160px;
+  object-fit: cover;
+  background-color: #CBD5E1;
+}
+
+.card-body {
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  flex-grow: 1;
+}
+
+.card-tags {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
 .category-tag {
-  background-color: #E0E7FF;
+  background-color: var(--tag-bg);
   color: var(--primary-blue);
-  padding: 0.2rem 0.6rem;
-  border-radius: 4px;
-  font-size: 0.85rem;
+  font-size: 0.75rem;
   font-weight: 600;
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
 }
 
 .level-badge {
-  background-color: #FEF3C7;
-  color: #D97706;
-  padding: 0.2rem 0.6rem;
+  background-color: var(--badge-yellow-bg);
+  color: var(--badge-yellow-text);
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.2rem 0.5rem;
   border-radius: 4px;
-  font-size: 0.85rem;
 }
 
-.instructor, .schedule, .location {
-  color: var(--text-muted);
-  font-size: 0.9rem;
-  margin: 0.3rem 0;
-}
-
-.spots-info {
-  margin: 1rem 0;
-  font-size: 0.9rem;
+.course-card h3 {
+  font-size: 1.1rem;
   font-weight: 600;
 }
 
-.btn-register {
-  background-color: var(--accent-orange);
-  color: white;
+.card-meta {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.card-footer {
+  padding: 1.25rem;
+  padding-top: 0;
+}
+
+/* Modal Popup */
+.modal-backdrop, .drawer-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(15, 23, 42, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.hidden {
+  display: none !important;
+}
+
+.modal-content {
+  background: var(--card-bg);
+  border-radius: 16px;
+  width: 90%;
+  max-width: 650px;
+  max-height: 90vh;
+  overflow-y: auto;
+  position: relative;
+  padding: 2rem;
+}
+
+.modal-close-btn {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  font-size: 1.5rem;
+  background: none;
   border: none;
-  padding: 0.75rem;
-  border-radius: 6px;
-  font-weight: bold;
   cursor: pointer;
+  color: var(--text-muted);
+}
+
+.modal-header-img {
   width: 100%;
-  transition: background 0.2s ease;
+  height: 200px;
+  object-fit: cover;
+  border-radius: 8px;
+  margin-bottom: 1rem;
 }
 
-.btn-register:hover:not(:disabled) {
-  background-color: #EA580C;
+.form-group {
+  margin-bottom: 1rem;
 }
 
-.btn-register:disabled {
-  background-color: #94A3B8;
-  cursor: not-allowed;
+.form-group label {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin-bottom: 0.3rem;
+}
+
+.form-group input {
+  width: 100%;
+  padding: 0.6rem;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+}
+
+/* Slide-out Drawer */
+.drawer-backdrop {
+  justify-content: flex-end;
+}
+
+.drawer-content {
+  background: var(--card-bg);
+  width: 100%;
+  max-width: 400px;
+  height: 100%;
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+}
+.drawer-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+.drawer-item {
+  padding: 1rem;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  margin-bottom: 1rem;
+}
+/* Responsive Breakpoints */
+@media (max-width: 850px) {
+  .layout-2col {
+    grid-template-columns: 1fr;
+  }
 }

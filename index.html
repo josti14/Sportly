@@ -3,21 +3,106 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sports Course Platform</title>
+  <title>Sportly - Find Your Next Move</title>
   <link rel="stylesheet" href="style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
+
+  <!-- Top Navigation Header -->
   <header class="navbar">
-    <h1>Sports Course Platform</h1>
-    <div id="course-count">Enrolled: 0</div>
+    <div class="nav-container">
+      <div class="logo">
+        <span class="logo-icon">⚡</span>
+        <span class="logo-text">Sportly</span>
+      </div>
+      <nav class="nav-links">
+        <a href="#" class="active">Explore courses</a>
+      </nav>
+      <div class="nav-actions">
+        <button id="btn-my-courses" class="btn-secondary">
+          My Courses <span id="course-count-badge" class="badge">0</span>
+        </button>
+      </div>
+    </div>
   </header>
 
-  <main class="container">
-    <h2>Available Courses</h2>
-    <div id="course-grid" class="grid">
-      <p>Loading courses...</p>
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="hero-content">
+      <h1>Find your next move.</h1>
+      <p>Explore led courses. Real progress. Find the training that fits you.</p>
     </div>
+  </section>
+
+  <!-- Main Content Layout (Sidebar + Grid) -->
+  <main class="container layout-2col">
+    
+    <!-- Left Filter Sidebar -->
+    <aside class="sidebar-filters">
+      <div class="filter-header">
+        <h3>Filters</h3>
+        <button id="btn-reset-filters" class="btn-text">Reset all</button>
+      </div>
+
+      <!-- Category Filter -->
+      <div class="filter-group">
+        <h4>Sport Category</h4>
+        <label><input type="checkbox" class="filter-category" value="Football"> Football</label>
+        <label><input type="checkbox" class="filter-category" value="Fitness"> Fitness</label>
+        <label><input type="checkbox" class="filter-category" value="Basketball"> Basketball</label>
+        <label><input type="checkbox" class="filter-category" value="Swimming"> Swimming</label>
+        <label><input type="checkbox" class="filter-category" value="Athletics"> Athletics</label>
+      </div>
+
+      <!-- Skill Level Filter -->
+      <div class="filter-group">
+        <h4>Skill Level</h4>
+        <label><input type="checkbox" class="filter-level" value="Beginner"> Beginner</label>
+        <label><input type="checkbox" class="filter-level" value="Intermediate"> Intermediate</label>
+        <label><input type="checkbox" class="filter-level" value="Advanced"> Advanced</label>
+      </div>
+    </aside>
+
+    <!-- Main Catalog Area -->
+    <section class="catalog-section">
+      <div class="catalog-header">
+        <h2>Available courses</h2>
+        <span id="results-count" class="results-count">Loading courses...</span>
+      </div>
+
+      <!-- Course Cards CSS Grid -->
+      <div id="course-grid" class="course-grid">
+        <!-- Dynamically injected via app.js -->
+      </div>
+    </section>
   </main>
+
+  <!-- Modal: Course Details & Registration -->
+  <div id="course-modal" class="modal-backdrop hidden">
+    <div class="modal-content">
+      <button id="modal-close" class="modal-close-btn">&times;</button>
+      
+      <div id="modal-body">
+        <!-- Dynamically injected via app.js -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Slide-out Drawer: My Enrolled Courses -->
+  <div id="drawer-backdrop" class="drawer-backdrop hidden">
+    <aside class="drawer-content">
+      <div class="drawer-header">
+        <h3>My Enrolled Courses</h3>
+        <button id="drawer-close" class="btn-text">&times; Close</button>
+      </div>
+      <div id="drawer-list" class="drawer-list">
+        <!-- Dynamically injected via app.js -->
+      </div>
+    </aside>
+  </div>
 
   <script src="app.js"></script>
 </body>
