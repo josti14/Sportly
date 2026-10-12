@@ -90,8 +90,13 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Filtering Logic
+  // DOM Elements
+  const searchInput = document.getElementById('search-input');
+  
+  // Filtering Logic (Categories + Levels + Search Query)
   function applyFilters() {
+    const searchQuery = searchInput ? searchInput.value.toLowerCase().trim() : '';
+
     const selectedCategories = Array.from(categoryFilters)
       .filter(cb => cb.checked)
       .map(cb => cb.value);
@@ -103,18 +108,27 @@ document.addEventListener('DOMContentLoaded', () => {
     const filtered = allCourses.filter(course => {
       const matchesCategory = selectedCategories.length === 0 || selectedCategories.includes(course.category);
       const matchesLevel = selectedLevels.length === 0 || selectedLevels.includes(course.level);
-      return matchesCategory && matchesLevel;
+      
+      const matchesSearch = 
+        course.title.toLowerCase().includes(searchQuery) ||
+        course.instructor.toLowerCase().includes(searchQuery) ||
+        course.location.toLowerCase().includes(searchQuery);
+
+      return matchesCategory && matchesLevel && matchesSearch;
     });
 
     renderCourses(filtered);
   }
 
-  categoryFilters.forEach(cb => cb.addEventListener('change', applyFilters));
-  levelFilters.forEach(cb => cb.addEventListener('change', applyFilters));
+  // Event Listeners for Live Search and Reset
+  if (searchInput) {
+    searchInput.addEventListener('input', applyFilters);
+  }
 
   btnResetFilters.addEventListener('click', () => {
     categoryFilters.forEach(cb => cb.checked = false);
     levelFilters.forEach(cb => cb.checked = false);
+    if (searchInput) searchInput.value = '';
     renderCourses(allCourses);
   });
 

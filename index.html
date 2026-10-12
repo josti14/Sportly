@@ -69,8 +69,14 @@
     <!-- Main Catalog Area -->
     <section class="catalog-section">
       <div class="catalog-header">
-        <h2>Available courses</h2>
-        <span id="results-count" class="results-count">Loading courses...</span>
+        <div>
+          <h2>Available courses</h2>
+          <span id="results-count" class="results-count">Loading courses...</span>
+        </div>
+        <!-- Live Search Input -->
+        <div class="search-box">
+          <input type="text" id="search-input" placeholder="Search by course, coach, or location...">
+        </div>
       </div>
 
       <!-- Course Cards CSS Grid -->
@@ -78,7 +84,6 @@
         <!-- Dynamically injected via app.js -->
       </div>
     </section>
-  </main>
 
   <!-- Modal: Course Details & Registration -->
   <div id="course-modal" class="modal-backdrop hidden">

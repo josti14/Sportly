@@ -376,3 +376,29 @@ body {
     grid-template-columns: 1fr;
   }
 }
+/* Search Input Styling */
+.search-box input {
+  padding: 0.6rem 1rem;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  font-size: 0.9rem;
+  width: 280px;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.search-box input:focus {
+  outline: none;
+  border-color: var(--primary-blue);
+  box-shadow: 0 0 0 3px rgba(30, 58, 138, 0.1);
+}
+
+@media (max-width: 600px) {
+  .catalog-header {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: stretch;
+  }
+  .search-box input {
+    width: 100%;
+  }
+}
