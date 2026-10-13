@@ -213,21 +213,32 @@ document.addEventListener('DOMContentLoaded', () => {
     openModal(course); // Refresh modal view
     applyFilters(); // Refresh card grid view
   }
-  function handleUnenrollment(registrationId, courseId) {
-    // 1. Remove from local storage array
-    savedRegistrations = savedRegistrations.filter(r => r.registrationId !== registrationId);
+function handleUnenrollment(registrationId, courseId) {
+    // 1. Remove enrollment entry from savedRegistrations array
+    if (registrationId) {
+      savedRegistrations = savedRegistrations.filter(r => r.registrationId !== registrationId);
+    } else {
+      savedRegistrations = savedRegistrations.filter(r => r.courseId !== courseId);
+    }
+
+    // 2. Persist updated registrations array to localStorage
     localStorage.setItem('my_courses', JSON.stringify(savedRegistrations));
 
-    // 2. Decrement enrolled count on target course object
+    // 3. Decrement capacity count on local course object
     const targetCourse = allCourses.find(c => c.id === courseId);
     if (targetCourse && targetCourse.enrolledCount > 0) {
       targetCourse.enrolledCount--;
     }
 
-    // 3. Update UI states
+    // 4. Force refresh all UI components
     updateEnrollmentBadge();
     renderDrawerItems();
-    applyFilters();
+    applyFilters(); // Re-renders grid cards and restores button to "View Details"
+
+    // 5. Close modal if open
+    if (modal && !modal.classList.contains('hidden')) {
+      modal.classList.add('hidden');
+    }
   }
 
   modalClose.addEventListener('click', () => modal.classList.add('hidden'));
@@ -238,7 +249,7 @@ document.addEventListener('DOMContentLoaded', () => {
     drawer.classList.remove('hidden');
   });
   drawerClose.addEventListener('click', () => drawer.classList.add('hidden'));
-  // Enhanced Drawer Functionality with Unenroll Feature
+// Enhanced Drawer Functionality with Unenroll Feature
   function renderDrawerItems() {
     drawerList.innerHTML = '';
 
@@ -251,29 +262,29 @@ document.addEventListener('DOMContentLoaded', () => {
       const item = document.createElement('div');
       item.className = 'drawer-item';
       
-      const formattedDate = new Date(reg.registeredAt).toLocaleDateString(undefined, {
+      const formattedDate = reg.registeredAt ? new Date(reg.registeredAt).toLocaleDateString(undefined, {
         month: 'short',
         day: 'numeric',
         year: 'numeric'
-      });
+      }) : 'Recently';
 
       item.innerHTML = `
         <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.5rem;">
           <h4 style="font-size: 1rem; color: var(--text-charcoal); margin: 0;">${reg.courseTitle}</h4>
           <span style="font-size: 0.75rem; background: #E0E7FF; color: var(--primary-blue); padding: 0.2rem 0.5rem; border-radius: 4px; font-weight: 600;">Enrolled</span>
         </div>
-        <p style="font-size: 0.8rem; color: var(--text-muted); margin: 0.2rem 0;"><strong>Student:</strong> ${reg.userName}</p>
-        <p style="font-size: 0.8rem; color: var(--text-muted); margin: 0.2rem 0;"><strong>Email:</strong> ${reg.userEmail}</p>
+        ${reg.userName ? `<p style="font-size: 0.8rem; color: var(--text-muted); margin: 0.2rem 0;"><strong>Student:</strong> ${reg.userName}</p>` : ''}
+        ${reg.userEmail ? `<p style="font-size: 0.8rem; color: var(--text-muted); margin: 0.2rem 0;"><strong>Email:</strong> ${reg.userEmail}</p>` : ''}
         <p style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.4rem;">Enrolled on: ${formattedDate}</p>
         
-        <button class="btn-text btn-unenroll" data-reg-id="${reg.registrationId}" data-course-id="${reg.courseId}" style="color: #DC2626; margin-top: 0.8rem; font-weight: 600;">
+        <button class="btn-text btn-unenroll" data-reg-id="${reg.registrationId || ''}" data-course-id="${reg.courseId}" style="color: #DC2626; margin-top: 0.8rem; font-weight: 600;">
           ✕ Unenroll from Course
         </button>
       `;
       drawerList.appendChild(item);
     });
 
-    // Attach Click Events for Unenroll Buttons
+    // Attach Event Listeners to Unenroll Buttons
     document.querySelectorAll('.btn-unenroll').forEach(btn => {
       btn.addEventListener('click', (e) => {
         const regId = e.target.getAttribute('data-reg-id');
