@@ -222,22 +222,48 @@ document.addEventListener('DOMContentLoaded', () => {
     drawer.classList.remove('hidden');
   });
   drawerClose.addEventListener('click', () => drawer.classList.add('hidden'));
+  // Enhanced Drawer Functionality with Unenroll Feature
   function renderDrawerItems() {
     drawerList.innerHTML = '';
 
     if (savedRegistrations.length === 0) {
-      drawerList.innerHTML = '<p style="color: var(--text-muted)">You have not enrolled in any courses yet.</p>';
+      drawerList.innerHTML = '<p style="color: var(--text-muted); font-size: 0.9rem;">You have not enrolled in any courses yet.</p>';
       return;
     }
 
     savedRegistrations.forEach(reg => {
       const item = document.createElement('div');
       item.className = 'drawer-item';
+      
+      const formattedDate = new Date(reg.registeredAt).toLocaleDateString(undefined, {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric'
+      });
+
       item.innerHTML = `
-        <h4 style="margin-bottom: 0.3rem">${reg.courseTitle}</h4>
-        <p style="font-size: 0.8rem; color: var(--text-muted)">Enrolled: ${new Date(reg.registeredAt).toLocaleDateString()}</p>
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.5rem;">
+          <h4 style="font-size: 1rem; color: var(--text-charcoal); margin: 0;">${reg.courseTitle}</h4>
+          <span style="font-size: 0.75rem; background: #E0E7FF; color: var(--primary-blue); padding: 0.2rem 0.5rem; border-radius: 4px; font-weight: 600;">Enrolled</span>
+        </div>
+        <p style="font-size: 0.8rem; color: var(--text-muted); margin: 0.2rem 0;"><strong>Student:</strong> ${reg.userName}</p>
+        <p style="font-size: 0.8rem; color: var(--text-muted); margin: 0.2rem 0;"><strong>Email:</strong> ${reg.userEmail}</p>
+        <p style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.4rem;">Enrolled on: ${formattedDate}</p>
+        
+        <button class="btn-text btn-unenroll" data-reg-id="${reg.registrationId}" data-course-id="${reg.courseId}" style="color: #DC2626; margin-top: 0.8rem; font-weight: 600;">
+          ✕ Unenroll from Course
+        </button>
       `;
       drawerList.appendChild(item);
+    });
+
+    // Attach Click Events for Unenroll Buttons
+    document.querySelectorAll('.btn-unenroll').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const regId = e.target.getAttribute('data-reg-id');
+        const courseId = e.target.getAttribute('data-course-id');
+        handleUnenrollment(regId, courseId);
+      });
     });
   }
 
