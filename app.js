@@ -213,6 +213,22 @@ document.addEventListener('DOMContentLoaded', () => {
     openModal(course); // Refresh modal view
     applyFilters(); // Refresh card grid view
   }
+  function handleUnenrollment(registrationId, courseId) {
+    // 1. Remove from local storage array
+    savedRegistrations = savedRegistrations.filter(r => r.registrationId !== registrationId);
+    localStorage.setItem('my_courses', JSON.stringify(savedRegistrations));
+
+    // 2. Decrement enrolled count on target course object
+    const targetCourse = allCourses.find(c => c.id === courseId);
+    if (targetCourse && targetCourse.enrolledCount > 0) {
+      targetCourse.enrolledCount--;
+    }
+
+    // 3. Update UI states
+    updateEnrollmentBadge();
+    renderDrawerItems();
+    applyFilters();
+  }
 
   modalClose.addEventListener('click', () => modal.classList.add('hidden'));
 
