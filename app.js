@@ -10,6 +10,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const levelFilters = document.querySelectorAll('.filter-level');
   const btnResetFilters = document.getElementById('btn-reset-filters');
   const searchInput = document.getElementById('search-input');
+  const dayFilters = document.querySelectorAll('.filter-day');
+  const hideFullFilter = document.getElementById('filter-hide-full');
   
   // Modal Elements
   const modal = document.getElementById('course-modal');
@@ -91,7 +93,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // Filtering Engine
-  function applyFilters() {
+ function applyFilters() {
     const searchQuery = searchInput ? searchInput.value.toLowerCase().trim() : '';
 
     const selectedCategories = Array.from(categoryFilters)
@@ -102,29 +104,49 @@ document.addEventListener('DOMContentLoaded', () => {
       .filter(cb => cb.checked)
       .map(cb => cb.value);
 
+    const selectedDays = Array.from(dayFilters)
+      .filter(cb => cb.checked)
+      .map(cb => cb.value);
+
+    const hideFull = hideFullFilter ? hideFullFilter.checked : false;
+
     const filtered = allCourses.filter(course => {
       const matchesCategory = selectedCategories.length === 0 || selectedCategories.includes(course.category);
       const matchesLevel = selectedLevels.length === 0 || selectedLevels.includes(course.level);
+      
+      // Match training days (checks if any selected day matches course days or schedule string)
+      const matchesDay = selectedDays.length === 0 || (
+        course.days && selectedDays.some(d => course.days.includes(d))
+      ) || selectedDays.some(d => course.schedule.includes(d));
+
+      // Match availability status
+      const matchesAvailability = !hideFull || (course.enrolledCount < course.maxCapacity);
+
+      // Match live text search
       const matchesSearch = 
         course.title.toLowerCase().includes(searchQuery) ||
         course.instructor.toLowerCase().includes(searchQuery) ||
         course.location.toLowerCase().includes(searchQuery);
 
-      return matchesCategory && matchesLevel && matchesSearch;
+      return matchesCategory && matchesLevel && matchesDay && matchesAvailability && matchesSearch;
     });
 
     renderCourses(filtered);
   }
 
-  // Event Listeners for Filters
+// Event Listeners for Filters
   categoryFilters.forEach(cb => cb.addEventListener('change', applyFilters));
   levelFilters.forEach(cb => cb.addEventListener('change', applyFilters));
+  dayFilters.forEach(cb => cb.addEventListener('change', applyFilters));
+  if (hideFullFilter) hideFullFilter.addEventListener('change', applyFilters);
   if (searchInput) searchInput.addEventListener('input', applyFilters);
 
   if (btnResetFilters) {
     btnResetFilters.addEventListener('click', () => {
       categoryFilters.forEach(cb => cb.checked = false);
       levelFilters.forEach(cb => cb.checked = false);
+      dayFilters.forEach(cb => cb.checked = false);
+      if (hideFullFilter) hideFullFilter.checked = false;
       if (searchInput) searchInput.value = '';
       renderCourses(allCourses);
     });
