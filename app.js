@@ -92,9 +92,16 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Filtering Engine
- function applyFilters() {
+// Multi-Criteria Filtering Engine
+  function applyFilters() {
+    const searchInput = document.getElementById('search-input');
     const searchQuery = searchInput ? searchInput.value.toLowerCase().trim() : '';
+
+    // Query active checkboxes dynamically
+    const categoryFilters = document.querySelectorAll('.filter-category');
+    const levelFilters = document.querySelectorAll('.filter-level');
+    const dayFilters = document.querySelectorAll('.filter-day');
+    const hideFullFilter = document.getElementById('filter-hide-full');
 
     const selectedCategories = Array.from(categoryFilters)
       .filter(cb => cb.checked)
@@ -111,18 +118,21 @@ document.addEventListener('DOMContentLoaded', () => {
     const hideFull = hideFullFilter ? hideFullFilter.checked : false;
 
     const filtered = allCourses.filter(course => {
+      // 1. Category Filter
       const matchesCategory = selectedCategories.length === 0 || selectedCategories.includes(course.category);
-      const matchesLevel = selectedLevels.length === 0 || selectedLevels.includes(course.level);
-      
-      // Match training days (checks if any selected day matches course days or schedule string)
-      const matchesDay = selectedDays.length === 0 || (
-        course.days && selectedDays.some(d => course.days.includes(d))
-      ) || selectedDays.some(d => course.schedule.includes(d));
 
-      // Match availability status
+      // 2. Skill Level Filter
+      const matchesLevel = selectedLevels.length === 0 || selectedLevels.includes(course.level);
+
+      // 3. Training Days Filter
+      const matchesDay = selectedDays.length === 0 || 
+        (course.days && selectedDays.some(d => course.days.includes(d))) || 
+        selectedDays.some(d => course.schedule.includes(d));
+
+      // 4. Availability Filter
       const matchesAvailability = !hideFull || (course.enrolledCount < course.maxCapacity);
 
-      // Match live text search
+      // 5. Text Search Filter
       const matchesSearch = 
         course.title.toLowerCase().includes(searchQuery) ||
         course.instructor.toLowerCase().includes(searchQuery) ||
@@ -134,6 +144,31 @@ document.addEventListener('DOMContentLoaded', () => {
     renderCourses(filtered);
   }
 
+  // Attach Event Listeners to Sidebar Elements
+  document.querySelectorAll('.filter-category, .filter-level, .filter-day').forEach(checkbox => {
+    checkbox.addEventListener('change', applyFilters);
+  });
+
+  const hideFullCheckbox = document.getElementById('filter-hide-full');
+  if (hideFullCheckbox) {
+    hideFullCheckbox.addEventListener('change', applyFilters);
+  }
+
+  const searchBox = document.getElementById('search-input');
+  if (searchBox) {
+    searchBox.addEventListener('input', applyFilters);
+  }
+
+  // Reset All Filters Button
+  const btnReset = document.getElementById('btn-reset-filters');
+  if (btnReset) {
+    btnReset.addEventListener('click', () => {
+      document.querySelectorAll('.filter-category, .filter-level, .filter-day').forEach(cb => cb.checked = false);
+      if (hideFullCheckbox) hideFullCheckbox.checked = false;
+      if (searchBox) searchBox.value = '';
+      renderCourses(allCourses);
+    });
+  }
 // Event Listeners for Filters
   categoryFilters.forEach(cb => cb.addEventListener('change', applyFilters));
   levelFilters.forEach(cb => cb.addEventListener('change', applyFilters));
