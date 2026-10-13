@@ -239,22 +239,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
     modal.classList.remove('hidden');
 
-    const form = document.getElementById('enrollment-form');
-    if (form) {
-      form.addEventListener('submit', (e) => {
-        e.preventDefault();
-        const studentName = document.getElementById('student-name').value;
-        const studentEmail = document.getElementById('student-email').value;
-        handleEnrollment(course, studentName, studentEmail);
-      });
-    }
+// Input Validation Rules (Open to All Users)
+        if (!studentName || !studentEmail) {
+          showToast('Please fill in your name and email address.', 'danger');
+          return;
+        }
 
-    const btnModalUnenroll = document.getElementById('btn-modal-unenroll');
-    if (btnModalUnenroll) {
-      btnModalUnenroll.addEventListener('click', () => {
-        handleUnenrollment(course.id);
-      });
-    }
+        // Standard email format check
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(studentEmail)) {
+          showToast('Please enter a valid email address.', 'danger');
+          return;
+        }
+
+        handleEnrollment(course, studentName, studentEmail);
+        showToast(`Successfully enrolled in ${course.title}! 🎉`, 'success');
   }
 
   // Handle Enrollment
