@@ -9,6 +9,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const categoryFilters = document.querySelectorAll('.filter-category');
   const levelFilters = document.querySelectorAll('.filter-level');
   const btnResetFilters = document.getElementById('btn-reset-filters');
+  const searchInput = document.getElementById('search-input');
   
   // Modal Elements
   const modal = document.getElementById('course-modal');
@@ -40,7 +41,9 @@ document.addEventListener('DOMContentLoaded', () => {
   // Render Grid Cards
   function renderCourses(coursesToRender) {
     courseGrid.innerHTML = '';
-    resultsCount.innerText = `Showing ${coursesToRender.length} course(s)`;
+    if (resultsCount) {
+      resultsCount.innerText = `Showing ${coursesToRender.length} course(s)`;
+    }
 
     if (coursesToRender.length === 0) {
       courseGrid.innerHTML = '<p>No courses match your selected filters.</p>';
@@ -48,14 +51,11 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     coursesToRender.forEach(course => {
-      const isEnrolled = savedRegistrations.some(r => r.courseId === course.id);
-      const isFull = course.enrolledCount >= course.maxCapacity;
+      const isEnrolled = savedRegistrations.some(r => String(r.courseId) === String(course.id));
+      const imageSrc = course.image || 'https://images.unsplash.com/photo-1517649763962-0c623266ddc0?auto=format&fit=crop&w=600&q=80';
 
       const card = document.createElement('div');
       card.className = 'course-card';
-
-      // Fallback placeholder image if assets image isn't available
-      const imageSrc = course.image || 'https://images.unsplash.com/photo-1517649763962-0c623266ddc0?auto=format&fit=crop&w=600&q=80';
 
       card.innerHTML = `
         <img class="card-img" src="${imageSrc}" alt="${course.title}">
@@ -80,20 +80,17 @@ document.addEventListener('DOMContentLoaded', () => {
       courseGrid.appendChild(card);
     });
 
-    // Attach Click Events to "View Details" Buttons
+    // Attach Click Events to Buttons
     document.querySelectorAll('.btn-view-details').forEach(btn => {
       btn.addEventListener('click', (e) => {
         const id = e.target.getAttribute('data-id');
-        const selectedCourse = allCourses.find(c => c.id === id);
+        const selectedCourse = allCourses.find(c => String(c.id) === String(id));
         if (selectedCourse) openModal(selectedCourse);
       });
     });
   }
 
-  // DOM Elements
-  const searchInput = document.getElementById('search-input');
-  
-  // Filtering Logic (Categories + Levels + Search Query)
+  // Filtering Engine
   function applyFilters() {
     const searchQuery = searchInput ? searchInput.value.toLowerCase().trim() : '';
 
@@ -108,7 +105,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const filtered = allCourses.filter(course => {
       const matchesCategory = selectedCategories.length === 0 || selectedCategories.includes(course.category);
       const matchesLevel = selectedLevels.length === 0 || selectedLevels.includes(course.level);
-      
       const matchesSearch = 
         course.title.toLowerCase().includes(searchQuery) ||
         course.instructor.toLowerCase().includes(searchQuery) ||
@@ -120,21 +116,23 @@ document.addEventListener('DOMContentLoaded', () => {
     renderCourses(filtered);
   }
 
-  // Event Listeners for Live Search and Reset
-  if (searchInput) {
-    searchInput.addEventListener('input', applyFilters);
-  }
+  // Event Listeners for Filters
+  categoryFilters.forEach(cb => cb.addEventListener('change', applyFilters));
+  levelFilters.forEach(cb => cb.addEventListener('change', applyFilters));
+  if (searchInput) searchInput.addEventListener('input', applyFilters);
 
-  btnResetFilters.addEventListener('click', () => {
-    categoryFilters.forEach(cb => cb.checked = false);
-    levelFilters.forEach(cb => cb.checked = false);
-    if (searchInput) searchInput.value = '';
-    renderCourses(allCourses);
-  });
+  if (btnResetFilters) {
+    btnResetFilters.addEventListener('click', () => {
+      categoryFilters.forEach(cb => cb.checked = false);
+      levelFilters.forEach(cb => cb.checked = false);
+      if (searchInput) searchInput.value = '';
+      renderCourses(allCourses);
+    });
+  }
 
   // Modal Functionality
   function openModal(course) {
-    const isEnrolled = savedRegistrations.some(r => r.courseId === course.id);
+    const isEnrolled = savedRegistrations.some(r => String(r.courseId) === String(course.id));
     const isFull = course.enrolledCount >= course.maxCapacity;
     const imageSrc = course.image || 'https://images.unsplash.com/photo-1517649763962-0c623266ddc0?auto=format&fit=crop&w=600&q=80';
 
@@ -153,9 +151,10 @@ document.addEventListener('DOMContentLoaded', () => {
       <hr style="margin: 1.5rem 0; border: none; border-top: 1px solid var(--border-color);">
 
       ${isEnrolled ? `
-        <div style="background: #DEF7EC; color: #03543F; padding: 1rem; border-radius: 8px; text-align: center; font-weight: 600;">
+        <div style="background: #DEF7EC; color: #03543F; padding: 1rem; border-radius: 8px; text-align: center; font-weight: 600; margin-bottom: 1rem;">
           You are enrolled in this course! ✓
         </div>
+        <button type="button" id="btn-modal-unenroll" class="btn-primary" style="background-color: #DC2626;">Unenroll from Course</button>
       ` : isFull ? `
         <div style="background: #FDE8E8; color: #9B1C1C; padding: 1rem; border-radius: 8px; text-align: center; font-weight: 600;">
           Course is Full
@@ -189,20 +188,31 @@ document.addEventListener('DOMContentLoaded', () => {
         e.preventDefault();
         const studentName = document.getElementById('student-name').value;
         const studentEmail = document.getElementById('student-email').value;
-        
         handleEnrollment(course, studentName, studentEmail);
+      });
+    }
+
+    const btnModalUnenroll = document.getElementById('btn-modal-unenroll');
+    if (btnModalUnenroll) {
+      btnModalUnenroll.addEventListener('click', () => {
+        handleUnenrollment(course.id);
       });
     }
   }
 
+  // Handle Enrollment
   function handleEnrollment(course, name, email) {
+    const alreadyEnrolled = savedRegistrations.some(r => String(r.courseId) === String(course.id));
+    if (alreadyEnrolled) return;
+
     course.enrolledCount++;
+
     const registration = {
       registrationId: 'reg-' + Date.now(),
-      courseId: course.id,
+      courseId: String(course.id),
       courseTitle: course.title,
-      userName: name,
-      userEmail: email,
+      userName: name || 'Student',
+      userEmail: email || '',
       registeredAt: new Date().toISOString()
     };
 
@@ -210,50 +220,15 @@ document.addEventListener('DOMContentLoaded', () => {
     localStorage.setItem('my_courses', JSON.stringify(savedRegistrations));
 
     updateEnrollmentBadge();
-    openModal(course); // Refresh modal view
-    applyFilters(); // Refresh card grid view
-  }
-function handleUnenrollment(registrationId, courseId) {
-    // 1. Remove enrollment entry from savedRegistrations array
-    if (registrationId) {
-      savedRegistrations = savedRegistrations.filter(r => r.registrationId !== registrationId);
-    } else {
-      savedRegistrations = savedRegistrations.filter(r => r.courseId !== courseId);
-    }
-
-    // 2. Persist updated registrations array to localStorage
-    localStorage.setItem('my_courses', JSON.stringify(savedRegistrations));
-
-    // 3. Decrement capacity count on local course object
-    const targetCourse = allCourses.find(c => c.id === courseId);
-    if (targetCourse && targetCourse.enrolledCount > 0) {
-      targetCourse.enrolledCount--;
-    }
-
-    // 4. Force refresh all UI components
-    updateEnrollmentBadge();
-    renderDrawerItems();
-    applyFilters(); // Re-renders grid cards and restores button to "View Details"
-
-    // 5. Close modal if open
-    if (modal && !modal.classList.contains('hidden')) {
-      modal.classList.add('hidden');
-    }
+    applyFilters();
+    openModal(course);
   }
 
-  modalClose.addEventListener('click', () => modal.classList.add('hidden'));
-
-  // Drawer Functionality
-  btnMyCourses.addEventListener('click', () => {
-    renderDrawerItems();
-    drawer.classList.remove('hidden');
-  });
-  drawerClose.addEventListener('click', () => drawer.classList.add('hidden'));
-// Enhanced Drawer Functionality with Unenroll Feature
+  // Render My Courses Drawer
   function renderDrawerItems() {
     drawerList.innerHTML = '';
 
-    if (savedRegistrations.length === 0) {
+    if (!savedRegistrations || savedRegistrations.length === 0) {
       drawerList.innerHTML = '<p style="color: var(--text-muted); font-size: 0.9rem;">You have not enrolled in any courses yet.</p>';
       return;
     }
@@ -261,12 +236,12 @@ function handleUnenrollment(registrationId, courseId) {
     savedRegistrations.forEach(reg => {
       const item = document.createElement('div');
       item.className = 'drawer-item';
-      
+
       const formattedDate = reg.registeredAt ? new Date(reg.registeredAt).toLocaleDateString(undefined, {
         month: 'short',
         day: 'numeric',
         year: 'numeric'
-      }) : 'Recently';
+      }) : 'Active';
 
       item.innerHTML = `
         <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.5rem;">
@@ -277,24 +252,65 @@ function handleUnenrollment(registrationId, courseId) {
         ${reg.userEmail ? `<p style="font-size: 0.8rem; color: var(--text-muted); margin: 0.2rem 0;"><strong>Email:</strong> ${reg.userEmail}</p>` : ''}
         <p style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.4rem;">Enrolled on: ${formattedDate}</p>
         
-        <button class="btn-text btn-unenroll" data-reg-id="${reg.registrationId || ''}" data-course-id="${reg.courseId}" style="color: #DC2626; margin-top: 0.8rem; font-weight: 600;">
+        <button type="button" class="btn-unenroll-drawer" data-course-id="${reg.courseId}" style="background: none; border: none; color: #DC2626; margin-top: 0.8rem; font-weight: 600; cursor: pointer; padding: 0;">
           ✕ Unenroll from Course
         </button>
       `;
       drawerList.appendChild(item);
     });
 
-    // Attach Event Listeners to Unenroll Buttons
-    document.querySelectorAll('.btn-unenroll').forEach(btn => {
+    document.querySelectorAll('.btn-unenroll-drawer').forEach(btn => {
       btn.addEventListener('click', (e) => {
-        const regId = e.target.getAttribute('data-reg-id');
-        const courseId = e.target.getAttribute('data-course-id');
-        handleUnenrollment(regId, courseId);
+        e.preventDefault();
+        const courseId = btn.getAttribute('data-course-id');
+        if (courseId) handleUnenrollment(courseId);
       });
     });
   }
 
+  // Handle Unenrollment
+  function handleUnenrollment(courseId) {
+    const targetId = String(courseId);
+
+    // 1. Remove from savedRegistrations array
+    savedRegistrations = savedRegistrations.filter(r => String(r.courseId) !== targetId);
+    localStorage.setItem('my_courses', JSON.stringify(savedRegistrations));
+
+    // 2. Decrement local course count safely
+    const targetCourse = allCourses.find(c => String(c.id) === targetId);
+    if (targetCourse && targetCourse.enrolledCount > 0) {
+      targetCourse.enrolledCount--;
+    }
+
+    // 3. Immediately re-render all UI elements
+    updateEnrollmentBadge();
+    renderDrawerItems();
+    applyFilters();
+
+    // 4. Close modal if open
+    if (modal && !modal.classList.contains('hidden')) {
+      modal.classList.add('hidden');
+    }
+  }
+
   function updateEnrollmentBadge() {
-    courseCountBadge.innerText = savedRegistrations.length;
+    if (courseCountBadge) {
+      courseCountBadge.innerText = savedRegistrations.length;
+    }
+  }
+
+  if (modalClose) {
+    modalClose.addEventListener('click', () => modal.classList.add('hidden'));
+  }
+
+  if (btnMyCourses) {
+    btnMyCourses.addEventListener('click', () => {
+      renderDrawerItems();
+      drawer.classList.remove('hidden');
+    });
+  }
+
+  if (drawerClose) {
+    drawerClose.addEventListener('click', () => drawer.classList.add('hidden'));
   }
 });
