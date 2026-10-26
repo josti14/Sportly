@@ -333,7 +333,7 @@ document.addEventListener('DOMContentLoaded', () => {
     localStorage.setItem('my_courses', JSON.stringify(savedRegistrations));
 
     // 2. Decrement local course count safely
-    const targetCourse = allCourses.find(c => String(c.id) === targetId);
+    const targetCourse1 = allCourses.find(c => String(c.id) === targetId);
     if (targetCourse && targetCourse.enrolledCount > 0) {
       targetCourse.enrolledCount--;
     }
@@ -347,6 +347,10 @@ document.addEventListener('DOMContentLoaded', () => {
     if (modal && !modal.classList.contains('hidden')) {
       modal.classList.add('hidden');
     }
+    const targetCourse = allCourses.find(c => String(c.id) === targetId);
+  if (targetCourse) {
+    showToast(`Unenrolled from ${targetCourse.title}.`, 'danger');
+  }
   }
 
   function updateEnrollmentBadge() {
@@ -369,4 +373,46 @@ document.addEventListener('DOMContentLoaded', () => {
   if (drawerClose) {
     drawerClose.addEventListener('click', () => drawer.classList.add('hidden'));
   }
+  // Toast Notification System
+  function showToast(message, type = 'success') {
+    const container = document.getElementById('toast-container');
+    if (!container) return;
+
+    const toast = document.createElement('div');
+    toast.className = `toast toast-${type}`;
+    toast.innerText = message;
+
+    container.appendChild(toast);
+
+    setTimeout(() => {
+      toast.remove();
+    }, 3000);
+  }
+
+  // Inside your modal form submit handler:
+  const form = document.getElementById('enrollment-form');
+  if (form) {
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const studentName = document.getElementById('student-name').value.trim();
+      const studentEmail = document.getElementById('student-email').value.trim();
+
+      // Input Validation Rules (Open to All Users)
+      if (!studentName || !studentEmail) {
+        showToast('Please fill in your name and email address.', 'danger');
+        return;
+      }
+
+      // Standard email format check
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(studentEmail)) {
+        showToast('Please enter a valid email address.', 'danger');
+        return;
+      }
+
+      handleEnrollment(course, studentName, studentEmail);
+      showToast(`Successfully enrolled in ${course.title}! 🎉`, 'success');
+    });
+  }
+
 });
