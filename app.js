@@ -189,6 +189,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Modal Functionality
   function openModal(course) {
+    // 1. Track the active course currently open in the modal
+    activeCourseId = course.id;
+
     const isEnrolled = savedRegistrations.some(r => String(r.courseId) === String(course.id));
     const isFull = course.enrolledCount >= course.maxCapacity;
     const imageSrc = course.image || 'https://images.unsplash.com/photo-1517649763962-0c623266ddc0?auto=format&fit=crop&w=600&q=80';
@@ -211,29 +214,45 @@ document.addEventListener('DOMContentLoaded', () => {
         <div style="background: #DEF7EC; color: #03543F; padding: 1rem; border-radius: 8px; text-align: center; font-weight: 600; margin-bottom: 1rem;">
           You are enrolled in this course! ✓
         </div>
-        <button type="button" id="btn-modal-unenroll" class="btn-primary" style="background-color: #DC2626;">Unenroll from Course</button>
+        <button type="button" id="btn-modal-unenroll" class="btn-primary" style="background-color: #DC2626; width: 100%;">Unenroll from Course</button>
       ` : isFull ? `
         <div style="background: #FDE8E8; color: #9B1C1C; padding: 1rem; border-radius: 8px; text-align: center; font-weight: 600;">
           Course is Full
         </div>
       ` : `
-      <form id="registration-form">
-        <div class="form-group">
-        <label for="reg-name">Full Name</label>
-        <input type="text" id="reg-name" placeholder="John Doe" required>
-      </div>
-      <div class="form-group">
-        <label for="reg-email">Email Address</label>
-        <input type="email" id="reg-email" placeholder="john.doe@example.com" required>
-      </div>
-        <button type="submit" class="btn btn-primary">Confirm Booking</button>
-      </form>
+        <form id="registration-form">
+          <div class="form-group">
+            <label for="reg-name">Full Name</label>
+            <input type="text" id="reg-name" placeholder="John Doe" required>
+          </div>
+          <div class="form-group">
+            <label for="reg-email">Email Address</label>
+            <input type="email" id="reg-email" placeholder="john.doe@example.com" required>
+          </div>
+          <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem;">Confirm Booking</button>
+        </form>
       `}
     `;
 
-    modal.classList.remove('hidden');
+    // 2. Attach listener to the dynamically created form
+    const regForm = document.getElementById('registration-form');
+    if (regForm) {
+      regForm.addEventListener('submit', validateAndSubmitRegistration);
+    }
 
-// Input Validation Rules (Open to All Users)
+    // 3. Attach listener to unenroll button if present
+    const unenrollBtn = document.getElementById('btn-modal-unenroll');
+    if (unenrollBtn) {
+      unenrollBtn.addEventListener('click', () => {
+        unenrollCourse(course.id);
+        modal.classList.add('hidden');
+      });
+    }
+
+    modal.classList.remove('hidden');
+}
+
+// Input Validation Rules
         if (!studentName || !studentEmail) {
           showToast('Please fill in your name and email address.', 'danger');
           return;
