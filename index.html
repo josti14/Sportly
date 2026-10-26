@@ -40,7 +40,7 @@
   <!-- Main Content Layout (Sidebar + Grid) -->
   <main class="container layout-2col">
     
-   <!-- Left Filter Sidebar -->
+    <!-- Left Filter Sidebar -->
     <aside class="sidebar-filters">
       <div class="filter-header">
         <h3>Filters</h3>
@@ -100,20 +100,16 @@
         </div>
       </div>
 
-      <!-- Course Cards CSS Grid -->
-      <div id="course-grid" class="course-grid">
-        <!-- Dynamically injected via app.js -->
-      </div>
+      <!-- Course Cards Grid -->
+      <div id="course-grid" class="course-grid"></div>
     </section>
+  </main>
 
   <!-- Modal: Course Details & Registration -->
   <div id="course-modal" class="modal-backdrop hidden">
     <div class="modal-content">
       <button id="modal-close" class="modal-close-btn">&times;</button>
-      
-      <div id="modal-body">
-        <!-- Dynamically injected via app.js -->
-      </div>
+      <div id="modal-body"></div>
     </div>
   </div>
 
@@ -124,15 +120,13 @@
         <h3>My Enrolled Courses</h3>
         <button id="drawer-close" class="btn-text">&times; Close</button>
       </div>
-      <div id="drawer-list" class="drawer-list">
-        <!-- Dynamically injected via app.js -->
-      </div>
+      <div id="drawer-list" class="drawer-list"></div>
     </aside>
   </div>
+
   <!-- Toast Notification Container -->
   <div id="toast-container" class="toast-container"></div>
+
   <script src="app.js"></script>
-</body>
-</html>
 </body>
 </html>

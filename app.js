@@ -1,7 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
   let allCourses = [];
   let savedRegistrations = JSON.parse(localStorage.getItem('my_courses')) || [];
-  let activeCourseId = null;
 
   // DOM Elements
   const courseGrid = document.getElementById('course-grid');
@@ -22,7 +21,11 @@ document.addEventListener('DOMContentLoaded', () => {
   const drawerList = document.getElementById('drawer-list');
 
   // Fetch Course Data
-  fetch('assets/data/courses.json?v=' + Date.now())
+  fetch('courses.json')
+    .then(res => {
+      if (!res.ok) return fetch('assets/data/courses.json'); // Fallback path check
+      return res;
+    })
     .then(res => {
       if (!res.ok) throw new Error('Failed to load courses');
       return res.json();
@@ -35,7 +38,7 @@ document.addEventListener('DOMContentLoaded', () => {
     .catch(err => {
       console.error(err);
       if (courseGrid) {
-        courseGrid.innerHTML = '<p style="color: red; text-align: center;">Error loading courses. Please refresh.</p>';
+        courseGrid.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: #EF4444;">Error loading courses. Please refresh.</p>';
       }
     });
 
@@ -83,10 +86,10 @@ document.addEventListener('DOMContentLoaded', () => {
       courseGrid.appendChild(card);
     });
 
-    // Attach Click Events to Grid Buttons
+    // Attach Click Event Handlers
     document.querySelectorAll('.btn-view-details').forEach(btn => {
       btn.addEventListener('click', (e) => {
-        const id = e.target.getAttribute('data-id');
+        const id = e.currentTarget.getAttribute('data-id');
         const selectedCourse = allCourses.find(c => String(c.id) === String(id));
         if (selectedCourse) openModal(selectedCourse);
       });
@@ -121,7 +124,7 @@ document.addEventListener('DOMContentLoaded', () => {
     renderCourses(filtered);
   }
 
-  // Attach Event Listeners to Sidebar Filters
+  // Event Listeners for Filters
   document.querySelectorAll('.filter-category, .filter-level, .filter-day, #filter-hide-full').forEach(el => {
     el.addEventListener('change', applyFilters);
   });
@@ -140,7 +143,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Modal Functionality
   function openModal(course) {
-    activeCourseId = course.id;
+    if (!modal || !modalBody) return;
 
     const isEnrolled = savedRegistrations.some(r => String(r.courseId) === String(course.id));
     const isFull = course.enrolledCount >= course.maxCapacity;
@@ -164,7 +167,7 @@ document.addEventListener('DOMContentLoaded', () => {
         <div style="background: #DEF7EC; color: #03543F; padding: 1rem; border-radius: 8px; text-align: center; font-weight: 600; margin-bottom: 1rem;">
           You are enrolled in this course! ✓
         </div>
-        <button type="button" id="btn-modal-unenroll" class="btn-primary" style="background-color: #DC2626; width: 100%;">Unenroll from Course</button>
+        <button type="button" id="btn-modal-unenroll" class="btn-primary" style="background-color: #DC2626;">Unenroll from Course</button>
       ` : isFull ? `
         <div style="background: #FDE8E8; color: #9B1C1C; padding: 1rem; border-radius: 8px; text-align: center; font-weight: 600;">
           Course is Full
@@ -179,12 +182,12 @@ document.addEventListener('DOMContentLoaded', () => {
             <label for="reg-email">Email Address</label>
             <input type="email" id="reg-email" placeholder="john.doe@example.com" required>
           </div>
-          <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem;">Confirm Booking</button>
+          <button type="submit" class="btn-primary" style="margin-top: 1rem;">Confirm Booking</button>
         </form>
       `}
     `;
 
-    // Attach submit handler to dynamic form
+    // Dynamic Form Submission Handler
     const regForm = document.getElementById('registration-form');
     if (regForm) {
       regForm.addEventListener('submit', (e) => {
@@ -207,7 +210,7 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     }
 
-    // Attach click handler to unenroll button inside modal
+    // Dynamic Unenrollment Handler
     const unenrollBtn = document.getElementById('btn-modal-unenroll');
     if (unenrollBtn) {
       unenrollBtn.addEventListener('click', () => {
@@ -247,11 +250,9 @@ document.addEventListener('DOMContentLoaded', () => {
   function handleUnenrollment(courseId) {
     const targetId = String(courseId);
 
-    // Remove from array and save
     savedRegistrations = savedRegistrations.filter(r => String(r.courseId) !== targetId);
     localStorage.setItem('my_courses', JSON.stringify(savedRegistrations));
 
-    // Decrement capacity
     const targetCourse = allCourses.find(c => String(c.id) === targetId);
     if (targetCourse && targetCourse.enrolledCount > 0) {
       targetCourse.enrolledCount--;
@@ -284,9 +285,7 @@ document.addEventListener('DOMContentLoaded', () => {
       item.className = 'drawer-item';
 
       const formattedDate = reg.registeredAt ? new Date(reg.registeredAt).toLocaleDateString(undefined, {
-        month: 'short',
-        day: 'numeric',
-        year: 'numeric'
+        month: 'short', day: 'numeric', year: 'numeric'
       }) : 'Active';
 
       item.innerHTML = `
@@ -305,7 +304,6 @@ document.addEventListener('DOMContentLoaded', () => {
       drawerList.appendChild(item);
     });
 
-    // Deduplicated Listener Binding
     drawerList.querySelectorAll('.btn-unenroll-drawer').forEach(btn => {
       btn.addEventListener('click', (e) => {
         e.preventDefault();
@@ -321,36 +319,20 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // Modal & Drawer Closing Listeners
-  if (modalClose) {
-    modalClose.addEventListener('click', () => modal.classList.add('hidden'));
-  }
-
+  // Modal & Drawer Listeners
+  if (modalClose) modalClose.addEventListener('click', () => modal.classList.add('hidden'));
   if (btnMyCourses) {
     btnMyCourses.addEventListener('click', () => {
       renderDrawerItems();
       if (drawer) drawer.classList.remove('hidden');
     });
   }
+  if (drawerClose) drawerClose.addEventListener('click', () => drawer.classList.add('hidden'));
 
-  if (drawerClose) {
-    drawerClose.addEventListener('click', () => drawer.classList.add('hidden'));
-  }
+  if (modal) modal.addEventListener('click', (e) => { if (e.target === modal) modal.classList.add('hidden'); });
+  if (drawer) drawer.addEventListener('click', (e) => { if (e.target === drawer) drawer.classList.add('hidden'); });
 
-  // Close modals when clicking dark backdrop outside content box
-  if (modal) {
-    modal.addEventListener('click', (e) => {
-      if (e.target === modal) modal.classList.add('hidden');
-    });
-  }
-
-  if (drawer) {
-    drawer.addEventListener('click', (e) => {
-      if (e.target === drawer) drawer.classList.add('hidden');
-    });
-  }
-
-  // Keyboard Navigation (ESC Key Shortcut)
+  // Keyboard Shortcuts (ESC Key)
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
       if (modal && !modal.classList.contains('hidden')) modal.classList.add('hidden');
