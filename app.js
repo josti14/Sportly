@@ -2,12 +2,13 @@ document.addEventListener('DOMContentLoaded', () => {
   let allCourses = [];
   let savedRegistrations = JSON.parse(localStorage.getItem('my_courses')) || [];
 
-  // DOM Elements
+  // Safe DOM Element Selectors
   const courseGrid = document.getElementById('course-grid');
   const resultsCount = document.getElementById('results-count');
   const courseCountBadge = document.getElementById('course-count-badge');
   const btnResetFilters = document.getElementById('btn-reset-filters');
   const searchInput = document.getElementById('search-input');
+  const clearBtn = document.getElementById('btn-clear-search');
   
   // Modal Elements
   const modal = document.getElementById('course-modal');
@@ -19,6 +20,30 @@ document.addEventListener('DOMContentLoaded', () => {
   const btnMyCourses = document.getElementById('btn-my-courses');
   const drawerClose = document.getElementById('drawer-close');
   const drawerList = document.getElementById('drawer-list');
+
+  // Capacity Visual Helper
+  function createCapacityMarkup(enrolled, max) {
+    const percentage = Math.min(100, Math.round((enrolled / max) * 100));
+    let colorClass = 'fill-normal';
+    
+    if (percentage >= 100) {
+      colorClass = 'fill-full';
+    } else if (percentage >= 75) {
+      colorClass = 'fill-warning';
+    }
+
+    return `
+      <div class="capacity-container">
+        <div class="capacity-header">
+          <span>Capacity</span>
+          <span>${enrolled} / ${max} spots</span>
+        </div>
+        <div class="capacity-track">
+          <div class="capacity-fill ${colorClass}" style="width: ${percentage}%;"></div>
+        </div>
+      </div>
+    `;
+  }
 
   // Fetch Course Data
   fetch('courses.json')
@@ -43,7 +68,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
   // Render Grid Cards
-function renderCourses(coursesToRender) {
+  function renderCourses(coursesToRender) {
     if (!courseGrid) return;
     courseGrid.innerHTML = '';
 
@@ -106,9 +131,8 @@ function renderCourses(coursesToRender) {
     });
   }
 
-// Multi-Criteria Course Filtering Engine
+  // Multi-Criteria Course Filtering Engine
   function applyFilters() {
-    // Dynamic query so searchInput is never null
     const searchEl = document.getElementById('search-input');
     const searchQuery = searchEl ? searchEl.value.toLowerCase().trim() : '';
 
@@ -142,17 +166,36 @@ function renderCourses(coursesToRender) {
     el.addEventListener('change', applyFilters);
   });
 
+  // Search Input & Clear Button Control
   if (searchInput) {
-  searchInput.addEventListener('input', () => {
-    updateFilterUI();
-    applyFilters();
-  });
-}
+    searchInput.addEventListener('input', () => {
+      if (clearBtn) {
+        if (searchInput.value.trim().length > 0) {
+          clearBtn.classList.remove('hidden');
+        } else {
+          clearBtn.classList.add('hidden');
+        }
+      }
+      applyFilters();
+    });
+  }
+
+  if (clearBtn) {
+    clearBtn.addEventListener('click', () => {
+      if (searchInput) {
+        searchInput.value = '';
+        searchInput.focus();
+      }
+      clearBtn.classList.add('hidden');
+      applyFilters();
+    });
+  }
 
   if (btnResetFilters) {
     btnResetFilters.addEventListener('click', () => {
       document.querySelectorAll('.filter-category, .filter-level, .filter-day, #filter-hide-full').forEach(cb => cb.checked = false);
       if (searchInput) searchInput.value = '';
+      if (clearBtn) clearBtn.classList.add('hidden');
       renderCourses(allCourses);
     });
   }
@@ -372,55 +415,3 @@ function renderCourses(coursesToRender) {
     }, 3000);
   }
 });
-
-// Search UI toggle & live filter execution
-  const searchEl = document.getElementById('search-input');
-  const clearBtn = document.getElementById('btn-clear-search');
-
-  if (searchEl) {
-    searchEl.addEventListener('input', () => {
-      if (clearBtn) {
-        if (searchEl.value.trim().length > 0) {
-          clearBtn.classList.remove('hidden');
-        } else {
-          clearBtn.classList.add('hidden');
-        }
-      }
-      applyFilters();
-    });
-  }
-
-  if (clearBtn) {
-    clearBtn.addEventListener('click', () => {
-      if (searchEl) {
-        searchEl.value = '';
-        searchEl.focus();
-      }
-      clearBtn.classList.add('hidden');
-      applyFilters();
-    });
-  }
-
-  // Capacity Visual Helper
-  function createCapacityMarkup(enrolled, max) {
-    const percentage = Math.min(100, Math.round((enrolled / max) * 100));
-    let colorClass = 'fill-normal';
-    
-    if (percentage >= 100) {
-      colorClass = 'fill-full';
-    } else if (percentage >= 75) {
-      colorClass = 'fill-warning';
-    }
-
-    return `
-      <div class="capacity-container">
-        <div class="capacity-header">
-          <span>Capacity</span>
-          <span>${enrolled} / ${max} spots</span>
-        </div>
-        <div class="capacity-track">
-          <div class="capacity-fill ${colorClass}" style="width: ${percentage}%;"></div>
-        </div>
-      </div>
-    `;
-  }
