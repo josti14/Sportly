@@ -27,13 +27,13 @@ body {
   line-height: 1.5;
 }
 
-/* Header & Navbar */
+/* Header & Navigation Bar */
+header, 
 .navbar {
-  background-color: var(--card-bg);
-  border-bottom: 1px solid var(--border-color);
-  position: sticky;
-  top: 0;
-  z-index: 100;
+  background-color: var(--primary-blue, #1E3A8A); /* Deep blue theme */
+  color: #FFFFFF;
+  padding: 1rem 2rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .nav-container {
@@ -45,13 +45,16 @@ body {
   align-items: center;
 }
 
-.logo {
+.logo, 
+.navbar .brand-name, 
+header h1 {
+  color: #FFFFFF !important;
+  font-weight: 700;
+  font-size: 1.5rem;
+  text-decoration: none;
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  font-weight: 700;
-  font-size: 1.25rem;
-  color: var(--primary-blue);
 }
 
 .nav-links a {
