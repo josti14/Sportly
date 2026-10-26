@@ -280,7 +280,7 @@ document.addEventListener('DOMContentLoaded', () => {
       registrationId: 'reg-' + Date.now(),
       courseId: String(course.id),
       courseTitle: course.title,
-      userName: name || 'Student',
+      userName: name || 'Participant',
       userEmail: email || '',
       registeredAt: new Date().toISOString()
     };
@@ -335,7 +335,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if (courseId) handleUnenrollment(courseId);
       });
     });
-  }
 
   // Handle Unenrollment
   function handleUnenrollment(courseId) {
@@ -347,7 +346,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 2. Decrement local course count safely
     const targetCourse1 = allCourses.find(c => String(c.id) === targetId);
-    if (targetCourse && targetCourse.enrolledCount > 0) {
+    if (targetCourse1 && targetCourse1.enrolledCount > 0) {
       targetCourse.enrolledCount--;
     }
 
@@ -427,5 +426,4 @@ document.addEventListener('DOMContentLoaded', () => {
       showToast(`Successfully enrolled in ${course.title}! 🎉`, 'success');
     });
   }
-
 });
