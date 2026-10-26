@@ -85,7 +85,7 @@ function renderCourses(coursesToRender) {
           <p class="card-meta">👤 ${course.instructor}</p>
           <p class="card-meta">📅 ${course.schedule}</p>
           <p class="card-meta">📍 ${course.location}</p>
-          <p class="card-meta"><strong>Capacity: ${course.enrolledCount}/${course.maxCapacity}</strong></p>
+          ${createCapacityMarkup(course.enrolledCount, course.maxCapacity)}
         </div>
         <div class="card-footer">
           <button class="btn-primary btn-view-details" data-id="${course.id}">
@@ -107,6 +107,7 @@ function renderCourses(coursesToRender) {
   }
 
   // Multi-Criteria Course Filtering Engine
+// Multi-Criteria Course Filtering Engine
   function applyFilters() {
     const searchQuery = searchInput ? searchInput.value.toLowerCase().trim() : '';
 
@@ -172,7 +173,7 @@ function renderCourses(coursesToRender) {
       <p><strong>Instructor:</strong> ${course.instructor}</p>
       <p><strong>Schedule:</strong> ${course.schedule}</p>
       <p><strong>Location:</strong> ${course.location}</p>
-      <p><strong>Enrolled:</strong> ${course.enrolledCount} / ${course.maxCapacity}</p>
+      ${createCapacityMarkup(course.enrolledCount, course.maxCapacity)}
       
       <hr style="margin: 1.5rem 0; border: none; border-top: 1px solid var(--border-color);">
 
@@ -369,7 +370,7 @@ function renderCourses(coursesToRender) {
     }, 3000);
   }
 });
-// Update Search Clear Button Visibility
+// Search Clear UI Toggle
   function updateFilterUI() {
     const searchVal = searchInput ? searchInput.value.trim() : '';
     const clearBtn = document.getElementById('btn-clear-search');
@@ -382,7 +383,15 @@ function renderCourses(coursesToRender) {
     }
   }
 
-  // Event Listener for Clear Search Button
+  // Combined Search Input Listener
+  if (searchInput) {
+    searchInput.addEventListener('input', () => {
+      updateFilterUI();
+      applyFilters();
+    });
+  }
+
+  // Clear Search Click Handler
   const clearBtn = document.getElementById('btn-clear-search');
   if (clearBtn && searchInput) {
     clearBtn.addEventListener('click', () => {
@@ -391,4 +400,27 @@ function renderCourses(coursesToRender) {
       applyFilters();
       searchInput.focus();
     });
+  }
+  // Capacity Visual Helper
+  function createCapacityMarkup(enrolled, max) {
+    const percentage = Math.min(100, Math.round((enrolled / max) * 100));
+    let colorClass = 'fill-normal';
+    
+    if (percentage >= 100) {
+      colorClass = 'fill-full';
+    } else if (percentage >= 75) {
+      colorClass = 'fill-warning';
+    }
+
+    return `
+      <div class="capacity-container">
+        <div class="capacity-header">
+          <span>Capacity</span>
+          <span>${enrolled} / ${max} spots</span>
+        </div>
+        <div class="capacity-track">
+          <div class="capacity-fill ${colorClass}" style="width: ${percentage}%;"></div>
+        </div>
+      </div>
+    `;
   }
