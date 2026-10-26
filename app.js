@@ -106,10 +106,11 @@ function renderCourses(coursesToRender) {
     });
   }
 
-  // Multi-Criteria Course Filtering Engine
 // Multi-Criteria Course Filtering Engine
   function applyFilters() {
-    const searchQuery = searchInput ? searchInput.value.toLowerCase().trim() : '';
+    // Dynamic query so searchInput is never null
+    const searchEl = document.getElementById('search-input');
+    const searchQuery = searchEl ? searchEl.value.toLowerCase().trim() : '';
 
     const selectedCategories = Array.from(document.querySelectorAll('.filter-category:checked')).map(cb => cb.value);
     const selectedLevels = Array.from(document.querySelectorAll('.filter-level:checked')).map(cb => cb.value);
@@ -127,7 +128,8 @@ function renderCourses(coursesToRender) {
       const matchesSearch = !searchQuery || 
         course.title.toLowerCase().includes(searchQuery) ||
         course.instructor.toLowerCase().includes(searchQuery) ||
-        course.location.toLowerCase().includes(searchQuery);
+        course.location.toLowerCase().includes(searchQuery) ||
+        course.category.toLowerCase().includes(searchQuery);
 
       return matchesCategory && matchesLevel && matchesDay && matchesAvailability && matchesSearch;
     });
@@ -370,37 +372,35 @@ function renderCourses(coursesToRender) {
     }, 3000);
   }
 });
-// Search Clear UI Toggle
-  function updateFilterUI() {
-    const searchVal = searchInput ? searchInput.value.trim() : '';
-    const clearBtn = document.getElementById('btn-clear-search');
-    if (clearBtn) {
-      if (searchVal.length > 0) {
-        clearBtn.classList.remove('hidden');
-      } else {
-        clearBtn.classList.add('hidden');
-      }
-    }
-  }
 
-  // Combined Search Input Listener
-  if (searchInput) {
-    searchInput.addEventListener('input', () => {
-      updateFilterUI();
-      applyFilters();
-    });
-  }
-
-  // Clear Search Click Handler
+// Search UI toggle & live filter execution
+  const searchEl = document.getElementById('search-input');
   const clearBtn = document.getElementById('btn-clear-search');
-  if (clearBtn && searchInput) {
-    clearBtn.addEventListener('click', () => {
-      searchInput.value = '';
-      updateFilterUI();
+
+  if (searchEl) {
+    searchEl.addEventListener('input', () => {
+      if (clearBtn) {
+        if (searchEl.value.trim().length > 0) {
+          clearBtn.classList.remove('hidden');
+        } else {
+          clearBtn.classList.add('hidden');
+        }
+      }
       applyFilters();
-      searchInput.focus();
     });
   }
+
+  if (clearBtn) {
+    clearBtn.addEventListener('click', () => {
+      if (searchEl) {
+        searchEl.value = '';
+        searchEl.focus();
+      }
+      clearBtn.classList.add('hidden');
+      applyFilters();
+    });
+  }
+
   // Capacity Visual Helper
   function createCapacityMarkup(enrolled, max) {
     const percentage = Math.min(100, Math.round((enrolled / max) * 100));
