@@ -1,17 +1,14 @@
 document.addEventListener('DOMContentLoaded', () => {
   let allCourses = [];
   let savedRegistrations = JSON.parse(localStorage.getItem('my_courses')) || [];
+  let activeCourseId = null;
 
   // DOM Elements
   const courseGrid = document.getElementById('course-grid');
   const resultsCount = document.getElementById('results-count');
   const courseCountBadge = document.getElementById('course-count-badge');
-  const categoryFilters = document.querySelectorAll('.filter-category');
-  const levelFilters = document.querySelectorAll('.filter-level');
   const btnResetFilters = document.getElementById('btn-reset-filters');
   const searchInput = document.getElementById('search-input');
-  const dayFilters = document.querySelectorAll('.filter-day');
-  const hideFullFilter = document.getElementById('filter-hide-full');
   
   // Modal Elements
   const modal = document.getElementById('course-modal');
@@ -37,18 +34,22 @@ document.addEventListener('DOMContentLoaded', () => {
     })
     .catch(err => {
       console.error(err);
-      courseGrid.innerHTML = '<p>Error loading courses. Please refresh.</p>';
+      if (courseGrid) {
+        courseGrid.innerHTML = '<p style="color: red; text-align: center;">Error loading courses. Please refresh.</p>';
+      }
     });
 
   // Render Grid Cards
   function renderCourses(coursesToRender) {
+    if (!courseGrid) return;
     courseGrid.innerHTML = '';
+
     if (resultsCount) {
       resultsCount.innerText = `Showing ${coursesToRender.length} course(s)`;
     }
 
     if (coursesToRender.length === 0) {
-      courseGrid.innerHTML = '<p>No courses match your selected filters.</p>';
+      courseGrid.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: var(--text-muted);">No courses match your selected filters.</p>';
       return;
     }
 
@@ -82,7 +83,7 @@ document.addEventListener('DOMContentLoaded', () => {
       courseGrid.appendChild(card);
     });
 
-    // Attach Click Events to Buttons
+    // Attach Click Events to Grid Buttons
     document.querySelectorAll('.btn-view-details').forEach(btn => {
       btn.addEventListener('click', (e) => {
         const id = e.target.getAttribute('data-id');
@@ -92,48 +93,24 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-// Multi-Criteria Course Filtering Engine
+  // Multi-Criteria Course Filtering Engine
   function applyFilters() {
-    const searchInput = document.getElementById('search-input');
     const searchQuery = searchInput ? searchInput.value.toLowerCase().trim() : '';
 
-    // Query active checkboxes dynamically
-    const categoryFilters = document.querySelectorAll('.filter-category');
-    const levelFilters = document.querySelectorAll('.filter-level');
-    const dayFilters = document.querySelectorAll('.filter-day');
+    const selectedCategories = Array.from(document.querySelectorAll('.filter-category:checked')).map(cb => cb.value);
+    const selectedLevels = Array.from(document.querySelectorAll('.filter-level:checked')).map(cb => cb.value);
+    const selectedDays = Array.from(document.querySelectorAll('.filter-day:checked')).map(cb => cb.value);
     const hideFullFilter = document.getElementById('filter-hide-full');
-
-    const selectedCategories = Array.from(categoryFilters)
-      .filter(cb => cb.checked)
-      .map(cb => cb.value);
-
-    const selectedLevels = Array.from(levelFilters)
-      .filter(cb => cb.checked)
-      .map(cb => cb.value);
-
-    const selectedDays = Array.from(dayFilters)
-      .filter(cb => cb.checked)
-      .map(cb => cb.value);
-
     const hideFull = hideFullFilter ? hideFullFilter.checked : false;
 
     const filtered = allCourses.filter(course => {
-      // 1. Category Filter
       const matchesCategory = selectedCategories.length === 0 || selectedCategories.includes(course.category);
-
-      // 2. Skill Level Filter
       const matchesLevel = selectedLevels.length === 0 || selectedLevels.includes(course.level);
-
-      // 3. Training Days Filter
       const matchesDay = selectedDays.length === 0 || 
         (course.days && selectedDays.some(d => course.days.includes(d))) || 
         selectedDays.some(d => course.schedule.includes(d));
-
-      // 4. Availability Filter
       const matchesAvailability = !hideFull || (course.enrolledCount < course.maxCapacity);
-
-      // 5. Text Search Filter
-      const matchesSearch = 
+      const matchesSearch = !searchQuery || 
         course.title.toLowerCase().includes(searchQuery) ||
         course.instructor.toLowerCase().includes(searchQuery) ||
         course.location.toLowerCase().includes(searchQuery);
@@ -144,44 +121,18 @@ document.addEventListener('DOMContentLoaded', () => {
     renderCourses(filtered);
   }
 
-  // Attach Event Listeners to Sidebar Elements
-  document.querySelectorAll('.filter-category, .filter-level, .filter-day').forEach(checkbox => {
-    checkbox.addEventListener('change', applyFilters);
+  // Attach Event Listeners to Sidebar Filters
+  document.querySelectorAll('.filter-category, .filter-level, .filter-day, #filter-hide-full').forEach(el => {
+    el.addEventListener('change', applyFilters);
   });
 
-  const hideFullCheckbox = document.getElementById('filter-hide-full');
-  if (hideFullCheckbox) {
-    hideFullCheckbox.addEventListener('change', applyFilters);
+  if (searchInput) {
+    searchInput.addEventListener('input', applyFilters);
   }
-
-  const searchBox = document.getElementById('search-input');
-  if (searchBox) {
-    searchBox.addEventListener('input', applyFilters);
-  }
-
-  // Reset All Filters Button
-  const btnReset = document.getElementById('btn-reset-filters');
-  if (btnReset) {
-    btnReset.addEventListener('click', () => {
-      document.querySelectorAll('.filter-category, .filter-level, .filter-day').forEach(cb => cb.checked = false);
-      if (hideFullCheckbox) hideFullCheckbox.checked = false;
-      if (searchBox) searchBox.value = '';
-      renderCourses(allCourses);
-    });
-  }
-// Event Listeners for Filters
-  categoryFilters.forEach(cb => cb.addEventListener('change', applyFilters));
-  levelFilters.forEach(cb => cb.addEventListener('change', applyFilters));
-  dayFilters.forEach(cb => cb.addEventListener('change', applyFilters));
-  if (hideFullFilter) hideFullFilter.addEventListener('change', applyFilters);
-  if (searchInput) searchInput.addEventListener('input', applyFilters);
 
   if (btnResetFilters) {
     btnResetFilters.addEventListener('click', () => {
-      categoryFilters.forEach(cb => cb.checked = false);
-      levelFilters.forEach(cb => cb.checked = false);
-      dayFilters.forEach(cb => cb.checked = false);
-      if (hideFullFilter) hideFullFilter.checked = false;
+      document.querySelectorAll('.filter-category, .filter-level, .filter-day, #filter-hide-full').forEach(cb => cb.checked = false);
       if (searchInput) searchInput.value = '';
       renderCourses(allCourses);
     });
@@ -189,7 +140,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Modal Functionality
   function openModal(course) {
-    // 1. Track the active course currently open in the modal
     activeCourseId = course.id;
 
     const isEnrolled = savedRegistrations.some(r => String(r.courseId) === String(course.id));
@@ -234,31 +184,19 @@ document.addEventListener('DOMContentLoaded', () => {
       `}
     `;
 
-    // 2. Attach listener to the dynamically created form
+    // Attach submit handler to dynamic form
     const regForm = document.getElementById('registration-form');
     if (regForm) {
-      regForm.addEventListener('submit', validateAndSubmitRegistration);
-    }
+      regForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const studentName = document.getElementById('reg-name').value.trim();
+        const studentEmail = document.getElementById('reg-email').value.trim();
 
-    // 3. Attach listener to unenroll button if present
-    const unenrollBtn = document.getElementById('btn-modal-unenroll');
-    if (unenrollBtn) {
-      unenrollBtn.addEventListener('click', () => {
-        unenrollCourse(course.id);
-        modal.classList.add('hidden');
-      });
-    }
-
-    modal.classList.remove('hidden');
-}
-
-// Input Validation Rules
         if (!studentName || !studentEmail) {
           showToast('Please fill in your name and email address.', 'danger');
           return;
         }
 
-        // Standard email format check
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!emailRegex.test(studentEmail)) {
           showToast('Please enter a valid email address.', 'danger');
@@ -266,7 +204,18 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         handleEnrollment(course, studentName, studentEmail);
-        showToast(`Successfully enrolled in ${course.title}! 🎉`, 'success');
+      });
+    }
+
+    // Attach click handler to unenroll button inside modal
+    const unenrollBtn = document.getElementById('btn-modal-unenroll');
+    if (unenrollBtn) {
+      unenrollBtn.addEventListener('click', () => {
+        handleUnenrollment(course.id);
+      });
+    }
+
+    modal.classList.remove('hidden');
   }
 
   // Handle Enrollment
@@ -291,10 +240,38 @@ document.addEventListener('DOMContentLoaded', () => {
     updateEnrollmentBadge();
     applyFilters();
     openModal(course);
+    showToast(`Successfully enrolled in ${course.title}! 🎉`, 'success');
+  }
+
+  // Handle Unenrollment
+  function handleUnenrollment(courseId) {
+    const targetId = String(courseId);
+
+    // Remove from array and save
+    savedRegistrations = savedRegistrations.filter(r => String(r.courseId) !== targetId);
+    localStorage.setItem('my_courses', JSON.stringify(savedRegistrations));
+
+    // Decrement capacity
+    const targetCourse = allCourses.find(c => String(c.id) === targetId);
+    if (targetCourse && targetCourse.enrolledCount > 0) {
+      targetCourse.enrolledCount--;
+    }
+
+    updateEnrollmentBadge();
+    renderDrawerItems();
+    applyFilters();
+
+    if (targetCourse) {
+      openModal(targetCourse);
+      showToast(`Unenrolled from ${targetCourse.title}.`, 'danger');
+    } else if (modal) {
+      modal.classList.add('hidden');
+    }
   }
 
   // Render My Courses Drawer
   function renderDrawerItems() {
+    if (!drawerList) return;
     drawerList.innerHTML = '';
 
     if (!savedRegistrations || savedRegistrations.length === 0) {
@@ -317,7 +294,7 @@ document.addEventListener('DOMContentLoaded', () => {
           <h4 style="font-size: 1rem; color: var(--text-charcoal); margin: 0;">${reg.courseTitle}</h4>
           <span style="font-size: 0.75rem; background: #E0E7FF; color: var(--primary-blue); padding: 0.2rem 0.5rem; border-radius: 4px; font-weight: 600;">Enrolled</span>
         </div>
-        ${reg.userName ? `<p style="font-size: 0.8rem; color: var(--text-muted); margin: 0.2rem 0;"><strong>Student:</strong> ${reg.userName}</p>` : ''}
+        ${reg.userName ? `<p style="font-size: 0.8rem; color: var(--text-muted); margin: 0.2rem 0;"><strong>Name:</strong> ${reg.userName}</p>` : ''}
         ${reg.userEmail ? `<p style="font-size: 0.8rem; color: var(--text-muted); margin: 0.2rem 0;"><strong>Email:</strong> ${reg.userEmail}</p>` : ''}
         <p style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.4rem;">Enrolled on: ${formattedDate}</p>
         
@@ -328,41 +305,14 @@ document.addEventListener('DOMContentLoaded', () => {
       drawerList.appendChild(item);
     });
 
-    document.querySelectorAll('.btn-unenroll-drawer').forEach(btn => {
+    // Deduplicated Listener Binding
+    drawerList.querySelectorAll('.btn-unenroll-drawer').forEach(btn => {
       btn.addEventListener('click', (e) => {
         e.preventDefault();
         const courseId = btn.getAttribute('data-course-id');
         if (courseId) handleUnenrollment(courseId);
       });
     });
-
-  // Handle Unenrollment
-  function handleUnenrollment(courseId) {
-    const targetId = String(courseId);
-
-    // 1. Remove from savedRegistrations array
-    savedRegistrations = savedRegistrations.filter(r => String(r.courseId) !== targetId);
-    localStorage.setItem('my_courses', JSON.stringify(savedRegistrations));
-
-    // 2. Decrement local course count safely
-    const targetCourse1 = allCourses.find(c => String(c.id) === targetId);
-    if (targetCourse1 && targetCourse1.enrolledCount > 0) {
-      targetCourse.enrolledCount--;
-    }
-
-    // 3. Immediately re-render all UI elements
-    updateEnrollmentBadge();
-    renderDrawerItems();
-    applyFilters();
-
-    // 4. Close modal if open
-    if (modal && !modal.classList.contains('hidden')) {
-      modal.classList.add('hidden');
-    }
-    const targetCourse = allCourses.find(c => String(c.id) === targetId);
-  if (targetCourse) {
-    showToast(`Unenrolled from ${targetCourse.title}.`, 'danger');
-  }
   }
 
   function updateEnrollmentBadge() {
@@ -371,6 +321,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
+  // Modal & Drawer Closing Listeners
   if (modalClose) {
     modalClose.addEventListener('click', () => modal.classList.add('hidden'));
   }
@@ -378,13 +329,35 @@ document.addEventListener('DOMContentLoaded', () => {
   if (btnMyCourses) {
     btnMyCourses.addEventListener('click', () => {
       renderDrawerItems();
-      drawer.classList.remove('hidden');
+      if (drawer) drawer.classList.remove('hidden');
     });
   }
 
   if (drawerClose) {
     drawerClose.addEventListener('click', () => drawer.classList.add('hidden'));
   }
+
+  // Close modals when clicking dark backdrop outside content box
+  if (modal) {
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) modal.classList.add('hidden');
+    });
+  }
+
+  if (drawer) {
+    drawer.addEventListener('click', (e) => {
+      if (e.target === drawer) drawer.classList.add('hidden');
+    });
+  }
+
+  // Keyboard Navigation (ESC Key Shortcut)
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      if (modal && !modal.classList.contains('hidden')) modal.classList.add('hidden');
+      if (drawer && !drawer.classList.contains('hidden')) drawer.classList.add('hidden');
+    }
+  });
+
   // Toast Notification System
   function showToast(message, type = 'success') {
     const container = document.getElementById('toast-container');
@@ -399,31 +372,5 @@ document.addEventListener('DOMContentLoaded', () => {
     setTimeout(() => {
       toast.remove();
     }, 3000);
-  }
-
-  // Inside your modal form submit handler:
-  const form = document.getElementById('enrollment-form');
-  if (form) {
-    form.addEventListener('submit', (e) => {
-      e.preventDefault();
-      const studentName = document.getElementById('student-name').value.trim();
-      const studentEmail = document.getElementById('student-email').value.trim();
-
-      // Input Validation Rules (Open to All Users)
-      if (!studentName || !studentEmail) {
-        showToast('Please fill in your name and email address.', 'danger');
-        return;
-      }
-
-      // Standard email format check
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(studentEmail)) {
-        showToast('Please enter a valid email address.', 'danger');
-        return;
-      }
-
-      handleEnrollment(course, studentName, studentEmail);
-      showToast(`Successfully enrolled in ${course.title}! 🎉`, 'success');
-    });
   }
 });
