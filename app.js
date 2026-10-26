@@ -92,7 +92,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-// Multi-Criteria Filtering Engine
+// Multi-Criteria Course Filtering Engine
   function applyFilters() {
     const searchInput = document.getElementById('search-input');
     const searchQuery = searchInput ? searchInput.value.toLowerCase().trim() : '';
@@ -217,23 +217,17 @@ document.addEventListener('DOMContentLoaded', () => {
           Course is Full
         </div>
       ` : `
-        <form id="enrollment-form">
-          <h3>Ready to join the team?</h3>
-          <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem;">Enter your student details to secure your spot.</p>
-          <div class="form-group">
-            <label>Full Name</label>
-            <input type="text" id="student-name" required placeholder="e.g. Jakub Joštiak">
-          </div>
-          <div class="form-group">
-            <label>Email Address</label>
-            <input type="email" id="student-email" required placeholder="student@fontys.nl">
-          </div>
-          <div class="form-group">
-            <label>Student ID</label>
-            <input type="text" id="student-id" required placeholder="481234">
-          </div>
-          <button type="submit" class="btn-primary" style="margin-top: 0.5rem">Confirm Registration →</button>
-        </form>
+      <form id="registration-form">
+        <div class="form-group">
+        <label for="reg-name">Full Name</label>
+        <input type="text" id="reg-name" placeholder="John Doe" required>
+      </div>
+      <div class="form-group">
+        <label for="reg-email">Email Address</label>
+        <input type="email" id="reg-email" placeholder="john.doe@example.com" required>
+      </div>
+        <button type="submit" class="btn btn-primary">Confirm Booking</button>
+      </form>
       `}
     `;
 
