@@ -43,7 +43,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
   // Render Grid Cards
-  function renderCourses(coursesToRender) {
+function renderCourses(coursesToRender) {
     if (!courseGrid) return;
     courseGrid.innerHTML = '';
 
@@ -52,7 +52,18 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     if (coursesToRender.length === 0) {
-      courseGrid.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: var(--text-muted);">No courses match your selected filters.</p>';
+      courseGrid.innerHTML = `
+        <div class="empty-state">
+          <h3>No courses found</h3>
+          <p>Try adjusting your search terms or sidebar filters.</p>
+          <button id="btn-empty-reset" class="btn-primary" style="width: auto; display: inline-block;">Reset All Filters</button>
+        </div>
+      `;
+
+      const emptyResetBtn = document.getElementById('btn-empty-reset');
+      if (emptyResetBtn && btnResetFilters) {
+        emptyResetBtn.addEventListener('click', () => btnResetFilters.click());
+      }
       return;
     }
 
@@ -86,7 +97,6 @@ document.addEventListener('DOMContentLoaded', () => {
       courseGrid.appendChild(card);
     });
 
-    // Attach Click Event Handlers
     document.querySelectorAll('.btn-view-details').forEach(btn => {
       btn.addEventListener('click', (e) => {
         const id = e.currentTarget.getAttribute('data-id');
@@ -130,8 +140,11 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   if (searchInput) {
-    searchInput.addEventListener('input', applyFilters);
-  }
+  searchInput.addEventListener('input', () => {
+    updateFilterUI();
+    applyFilters();
+  });
+}
 
   if (btnResetFilters) {
     btnResetFilters.addEventListener('click', () => {
@@ -356,3 +369,26 @@ document.addEventListener('DOMContentLoaded', () => {
     }, 3000);
   }
 });
+// Update Search Clear Button Visibility
+  function updateFilterUI() {
+    const searchVal = searchInput ? searchInput.value.trim() : '';
+    const clearBtn = document.getElementById('btn-clear-search');
+    if (clearBtn) {
+      if (searchVal.length > 0) {
+        clearBtn.classList.remove('hidden');
+      } else {
+        clearBtn.classList.add('hidden');
+      }
+    }
+  }
+
+  // Event Listener for Clear Search Button
+  const clearBtn = document.getElementById('btn-clear-search');
+  if (clearBtn && searchInput) {
+    clearBtn.addEventListener('click', () => {
+      searchInput.value = '';
+      updateFilterUI();
+      applyFilters();
+      searchInput.focus();
+    });
+  }

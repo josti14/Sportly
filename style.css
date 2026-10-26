@@ -447,3 +447,32 @@ header h1 {
   from { opacity: 1; }
   to { opacity: 0; }
 }
+/* Search Input Clear Button */
+.search-box input {
+  padding-right: 2rem; /* Reserve space for ✕ button */
+}
+
+#btn-clear-search:hover {
+  color: var(--text-charcoal);
+}
+
+/* Empty State Card */
+.empty-state {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 3rem 1.5rem;
+  background: var(--card-bg);
+  border: 1px dashed var(--border-color);
+  border-radius: 12px;
+}
+
+.empty-state h3 {
+  font-size: 1.25rem;
+  margin-bottom: 0.5rem;
+  color: var(--text-charcoal);
+}
+
+.empty-state p {
+  color: var(--text-muted);
+  margin-bottom: 1.25rem;
+}

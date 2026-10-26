@@ -94,12 +94,12 @@
           <h2>Available courses</h2>
           <span id="results-count" class="results-count">Loading courses...</span>
         </div>
-        <!-- Live Search Input -->
-        <div class="search-box">
+      <!-- Live Search Input with Clear Button -->
+        <div class="search-box" style="position: relative; display: flex; align-items: center;">
           <input type="text" id="search-input" placeholder="Search by course, coach, or location...">
+          <button id="btn-clear-search" class="hidden" style="position: absolute; right: 10px; background: none; border: none; font-size: 1rem; color: var(--text-muted); cursor: pointer; padding: 0 4px;">✕</button>
         </div>
       </div>
-
       <!-- Course Cards Grid -->
       <div id="course-grid" class="course-grid"></div>
     </section>
